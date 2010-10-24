@@ -35,27 +35,25 @@
 - (void) layoutSubviews {
 	self.textLabel.textAlignment = UITextAlignmentCenter;
 	self.contentMode = UIViewContentModeCenter;
-	CGRect r = self.textLabel.frame;
-	self.textLabel.alpha = 0.0;
 	
-	if(self.editing){
-		[self.imageView setImage:[UIImage imageNamed:@"clear.png"]];
-	}else {
-		[self.imageView setImage:nil];
-	}
+	CGRect r = self.textLabel.frame;
+	double labelX = 16.0f;
+	
+	self.textLabel.alpha = 0.0;
+	self.textLabel.backgroundColor = [UIColor clearColor];
 	
 	[UIView beginAnimations:@"alignment" context:nil];
 	if(self.editing){
+		r.origin.x = labelX;
 		self.textLabel.textAlignment = UITextAlignmentLeft;
 		self.textLabel.frame = r;
 		self.textLabel.alpha = 1.0;
-		[self.imageView setImage:nil];
 		
 	}else{
+		r.origin.x = -labelX;
 		self.textLabel.textAlignment = UITextAlignmentCenter;
 		self.textLabel.frame = r;
 		self.textLabel.alpha = 1.0;
-		[self.imageView setImage:[UIImage imageNamed:@"clear.png"]];
 	}
 	
 	[super layoutSubviews];
