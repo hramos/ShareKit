@@ -208,7 +208,8 @@
     if (cell == nil)
 	{
         cell = [[[SHKCustomShareMenuCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-		cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+		cell.accessoryType = UITableViewCellAccessoryNone;
+		[cell.textLabel setTextAlignment:UITextAlignmentCenter];
 	}
     
 	NSDictionary *rowData = [self rowDataAtIndexPath:indexPath];
