@@ -209,12 +209,25 @@
 	{
         cell = [[[SHKCustomShareMenuCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
 		cell.accessoryType = UITableViewCellAccessoryNone;
+		cell.editingAccessoryType = UITableViewCellAccessoryNone;
 		[cell.textLabel setTextAlignment:UITextAlignmentCenter];
+		[cell setShouldIndentWhileEditing:NO];
+		cell.tag = 0;
 	}
     
 	NSDictionary *rowData = [self rowDataAtIndexPath:indexPath];
 	cell.textLabel.text = [rowData objectForKey:@"name"];
 	
+	if([exclusions objectForKey:[rowData objectForKey:@"className"]] == nil) {
+		cell.editingAccessoryType = UITableViewCellAccessoryCheckmark;		
+		cell.tag = 1;
+	}
+	else {
+		cell.editingAccessoryType = UITableViewCellAccessoryNone;		
+		cell.tag = 0;
+	}
+		
+	/*
 	if (cell.editingAccessoryView == nil)
 	{
 		UISwitch *toggle = [[UISwitch alloc] initWithFrame:CGRectZero];
@@ -224,7 +237,7 @@
 	}
 	
 	[(UISwitch *)cell.editingAccessoryView setOn:[exclusions objectForKey:[rowData objectForKey:@"className"]] == nil];
-	
+	*/
     return cell;
 }
 
@@ -250,15 +263,16 @@
 	{
 		UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
 		
-		UISwitch *toggle = (UISwitch *)[cell editingAccessoryView];
-		[toggle setOn:!toggle.on animated:YES];
-		
-		if (toggle.on)
+		if (cell.tag == 0) { 
+			cell.tag = 1;
 			[exclusions removeObjectForKey:[rowData objectForKey:@"className"]];
+			cell.editingAccessoryType = UITableViewCellAccessoryCheckmark;
+		} else {
+			cell.tag = 0;
+			[exclusions setObject:@"1" forKey:[rowData objectForKey:@"className"]];			
+			cell.editingAccessoryType = UITableViewCellAccessoryNone;
+		} 
 		
-		else 
-			[exclusions setObject:@"1" forKey:[rowData objectForKey:@"className"]];
-
 		[self.tableView deselectRowAtIndexPath:indexPath animated:NO];
 	}
 	
