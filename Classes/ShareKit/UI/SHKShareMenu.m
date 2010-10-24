@@ -90,7 +90,7 @@
 	self.tableData = [NSMutableArray arrayWithCapacity:0];
 	[tableData addObject:[self section:@"actions"]];
 	[tableData addObject:[self section:@"services"]];
-		
+	
 	// Handling Excluded items
 	// If in editing mode, show them
 	// If not editing, hide them
@@ -100,7 +100,7 @@
 		self.exclusions = [NSMutableDictionary dictionaryWithCapacity:0];
 	
 	NSMutableArray *excluded = [NSMutableArray arrayWithCapacity:0];
-		
+	
 	if (!self.tableView.editing || animated)
 	{
 		int s = 0;
@@ -110,7 +110,7 @@
 		NSMutableArray *sectionCopy;
 		NSMutableDictionary *tableDataCopy = [[tableData mutableCopy] autorelease];
 		NSMutableIndexSet *indexes = [[NSMutableIndexSet alloc] init];
-				
+		
 		for(NSMutableArray *section in tableDataCopy)
 		{
 			r = 0;
@@ -130,7 +130,7 @@
 				
 				r++;
 			}
-				
+			
 			if (!self.tableView.editing)
 			{
 				[sectionCopy removeObjectsAtIndexes:indexes];
@@ -169,7 +169,7 @@
 		if ( [class canShare] && [class canShareType:item.shareType] )
 			[sectionData addObject:[NSDictionary dictionaryWithObjectsAndKeys:sharerClassName,@"className",[class sharerTitle],@"name",nil]];
 	}
-
+	
 	if (sectionData.count && SHKShareMenuAlphabeticalOrder)
 		[sectionData sortUsingDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease]]];
 	
@@ -202,43 +202,32 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath 
 {    
-    static NSString *CellIdentifier = @"Cell";
-    
-    SHKCustomShareMenuCell *cell = (SHKCustomShareMenuCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil)
+	
+	static NSString *CellIdentifier = @"Cell";
+	
+	SHKCustomShareMenuCell *cell = (SHKCustomShareMenuCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+	if (cell == nil)
 	{
-        cell = [[[SHKCustomShareMenuCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+		cell = [[[SHKCustomShareMenuCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
 		cell.accessoryType = UITableViewCellAccessoryNone;
-		cell.editingAccessoryType = UITableViewCellAccessoryNone;
-		[cell.textLabel setTextAlignment:UITextAlignmentCenter];
-		[cell setShouldIndentWhileEditing:NO];
-		cell.tag = 0;
+		cell.textLabel.textAlignment = UITextAlignmentCenter;
 	}
-    
+	
 	NSDictionary *rowData = [self rowDataAtIndexPath:indexPath];
 	cell.textLabel.text = [rowData objectForKey:@"name"];
 	
-	if([exclusions objectForKey:[rowData objectForKey:@"className"]] == nil) {
-		cell.editingAccessoryType = UITableViewCellAccessoryCheckmark;		
-		cell.tag = 1;
-	}
-	else {
-		cell.editingAccessoryType = UITableViewCellAccessoryNone;		
-		cell.tag = 0;
-	}
-		
-	/*
 	if (cell.editingAccessoryView == nil)
 	{
 		UISwitch *toggle = [[UISwitch alloc] initWithFrame:CGRectZero];
-		toggle.userInteractionEnabled = NO;
+		toggle.userInteractionEnabled = YES;
+		[toggle addTarget:self action:@selector(toggle:) forControlEvents:UIControlEventValueChanged];
 		cell.editingAccessoryView = toggle;
-		[toggle release];
+		cell.tag = [indexPath row];
+		[toggle release];			
 	}
 	
 	[(UISwitch *)cell.editingAccessoryView setOn:[exclusions objectForKey:[rowData objectForKey:@"className"]] == nil];
-	*/
-    return cell;
+	return cell;
 }
 
 - (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -261,19 +250,8 @@
 	
 	if (tableView.editing)
 	{
-		UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-		
-		if (cell.tag == 0) { 
-			cell.tag = 1;
-			[exclusions removeObjectForKey:[rowData objectForKey:@"className"]];
-			cell.editingAccessoryType = UITableViewCellAccessoryCheckmark;
-		} else {
-			cell.tag = 0;
-			[exclusions setObject:@"1" forKey:[rowData objectForKey:@"className"]];			
-			cell.editingAccessoryType = UITableViewCellAccessoryNone;
-		} 
-		
 		[self.tableView deselectRowAtIndexPath:indexPath animated:NO];
+		return;
 	}
 	
 	else 
@@ -318,7 +296,7 @@
 	[self rebuildTableDataAnimated:YES];
 	
 	[self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-																			 target:self
+																							  target:self
 																							  action:@selector(save)] autorelease] animated:YES];
 }
 
@@ -331,10 +309,29 @@
 	
 	[self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:SHKLocalizedString(@"Edit")
 																				 style:UIBarButtonItemStyleBordered
-																							  target:self
-																							  action:@selector(edit)] autorelease] animated:YES];
+																				target:self
+																				action:@selector(edit)] autorelease] animated:YES];
 	
 }
 
-@end
+#pragma mark -
+#pragma mark UISwitch
 
+- (IBAction) toggle:(UISwitch *)toggle {
+//	[toggle setOn:!toggle.on animated:YES];	
+	NSDictionary *rowData = nil;
+	// problem - how do we know which indexPath was clicked?
+
+	if (toggle.on)
+		[exclusions removeObjectForKey:[rowData objectForKey:@"className"]];
+	
+	else 
+		[exclusions setObject:@"1" forKey:[rowData objectForKey:@"className"]];	
+}
+/*
+ UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+ 
+ UISwitch *toggle = (UISwitch *)[cell editingAccessoryView];
+ 
+ */
+@end
